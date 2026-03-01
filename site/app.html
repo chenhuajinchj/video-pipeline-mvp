@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小陈的视频流水线 — 试用</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--card:#12121a;--border:#1e1e2e;--text:#e0e0e0;--muted:#888;--accent:#6c5ce7;--accent2:#a29bfe;--success:#2d6a4f;--error:#9b2226}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border)}
+.top-bar h1{font-size:1.1rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.top-bar a{color:var(--muted);font-size:.85rem;text-decoration:none}
+
+.container{max-width:960px;margin:0 auto;padding:32px 24px}
+
+.steps{display:flex;gap:0;margin-bottom:32px}
+.step-item{flex:1;text-align:center;padding:12px 8px;border-bottom:3px solid var(--border);color:var(--muted);font-size:.85rem;cursor:default;transition:.2s}
+.step-item.active{border-color:var(--accent);color:var(--text)}
+.step-item.done{border-color:var(--success);color:#b7e4c7}
+.step-num{display:inline-block;width:22px;height:22px;line-height:22px;border-radius:50%;background:var(--border);font-size:.75rem;margin-right:6px}
+.step-item.active .step-num{background:var(--accent);color:#fff}
+.step-item.done .step-num{background:var(--success);color:#fff}
+
+.panel{display:none}
+.panel.visible{display:block}
+
+textarea{width:100%;min-height:200px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:16px;font-size:.95rem;font-family:inherit;resize:vertical;line-height:1.7}
+textarea:focus{outline:none;border-color:var(--accent)}
+textarea::placeholder{color:#555}
+
+.row{display:flex;gap:16px;margin-top:16px;align-items:end;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:.8rem;color:var(--muted)}
+select,input[type=number]{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 12px;font-size:.9rem}
+select:focus,input:focus{outline:none;border-color:var(--accent)}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:8px;border:none;font-size:.95rem;cursor:pointer;transition:.2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#5b4bd5}
+.btn-primary:disabled{background:#333;color:#666;cursor:not-allowed}
+.btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent)}
+
+.hint{font-size:.8rem;color:var(--muted);margin-top:8px}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #333;border-top-color:var(--accent2);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.sb-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:.85rem}
+.sb-table th{text-align:left;padding:8px 10px;background:#1a1a2e;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap}
+.sb-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.sb-table tr:hover{background:rgba(108,92,231,.06)}
+.tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:.75rem}
+.tag-scene{background:#1d3557;color:#a8dadc}
+.tag-person{background:#2d6a4f;color:#b7e4c7}
+.tag-data{background:#e76f51;color:#fff}
+.tag-text{background:#6c5ce7;color:#fff}
+.tag-metaphor{background:#7b2cbf;color:#e0aaff}
+.tag-other{background:#333;color:#ccc}
+
+.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:16px}
+.img-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:.2s}
+.img-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.img-card .img-info{padding:8px 10px;font-size:.8rem}
+.img-card .shot-num{color:var(--accent2)}
+.img-card.pending{opacity:.4}
+.img-card.failed{border-color:var(--error)}
+
+.progress-wrap{margin-top:16px}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s;width:0}
+.progress-text{font-size:.85rem;color:var(--muted);margin-top:8px}
+
+.warnings{background:#2d1b00;border:1px solid #5a3600;border-radius:8px;padding:12px 16px;margin-top:12px;font-size:.85rem;color:#ffc078}
+
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.summary-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.summary-item .num{font-size:1.8rem;font-weight:700;color:var(--accent2)}
+.summary-item .lbl{font-size:.8rem;color:var(--muted);margin-top:4px}
+
+.mt{margin-top:16px}
+.mb{margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>小陈的视频流水线</h1>
+  <a href="/">首页</a>
+</div>
+
+<div class="container">
+
+<div class="steps">
+  <div class="step-item active" id="step1"><span class="step-num">1</span>输入逐字稿</div>
+  <div class="step-item" id="step2"><span class="step-num">2</span>预览分镜</div>
+  <div class="step-item" id="step3"><span class="step-num">3</span>生成图片</div>
+  <div class="step-item" id="step4"><span class="step-num">4</span>完成</div>
+</div>
+
+<!-- Panel 1: Input -->
+<div class="panel visible" id="panel1">
+  <textarea id="scriptInput" placeholder="在这里粘贴你的逐字稿...&#10;&#10;例如：&#10;你有没有想过，为什么有些人工作八小时就能完成别人十二小时的量？秘密不在于他们更聪明，而在于他们懂得「深度工作」。今天我要分享三个让你效率翻倍的方法..."></textarea>
+  <div class="row">
+    <div class="field">
+      <label>视频风格</label>
+      <select id="styleSelect">
+        <option value="AI科技/知识分享">AI科技/知识分享</option>
+        <option value="故事/叙事">故事/叙事</option>
+        <option value="教程/教学">教程/教学</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>目标时长</label>
+      <select id="durationSelect">
+        <option value="3-5分钟">3-5 分钟</option>
+        <option value="6-10分钟" selected>6-10 分钟</option>
+        <option value="10-15分钟">10-15 分钟</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" id="btnGenStoryboard" onclick="genStoryboard()">
+      生成分镜表
+    </button>
+  </div>
+  <div class="hint">Gemini Flash API 通常 10-30 秒返回结果</div>
+</div>
+
+<!-- Panel 2: Storyboard Preview -->
+<div class="panel" id="panel2">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+    <div>
+      <span style="color:var(--muted)">项目 ID：</span>
+      <code id="projectIdDisplay" style="color:var(--accent2)"></code>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary" onclick="goStep(1)">返回修改</button>
+      <button class="btn btn-primary" id="btnGenImages" onclick="genImages()">生成图片素材</button>
+    </div>
+  </div>
+  <div id="warningsBox"></div>
+  <div id="summaryBox" class="summary"></div>
+  <div style="overflow-x:auto">
+    <table class="sb-table" id="storyboardTable">
+      <thead>
+        <tr><th>镜头</th><th>时间</th><th>逐字稿</th><th>类型</th><th>画面描述</th><th>情绪</th></tr>
+      </thead>
+      <tbody id="storyboardBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Panel 3: Image Generation -->
+<div class="panel" id="panel3">
+  <div class="row mb">
+    <div class="field">
+      <label>图片风格</label>
+      <select id="imgStyleSelect">
+        <option value="default">默认（写实）</option>
+        <option value="tech">科技感</option>
+        <option value="knowledge">知识/温暖</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>并发数</label>
+      <input type="number" id="concurrencyInput" value="3" min="1" max="10" style="width:70px">
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">准备中...</div>
+  </div>
+  <div class="img-grid" id="imgGrid"></div>
+  <div class="mt" id="imgDoneActions" style="display:none;gap:12px">
+    <button class="btn btn-primary" onclick="downloadProject()">打包下载</button>
+    <button class="btn btn-secondary" onclick="goStep(4)">查看总结</button>
+  </div>
+</div>
+
+<!-- Panel 4: Done -->
+<div class="panel" id="panel4">
+  <div style="text-align:center;padding:40px 0">
+    <div style="font-size:3rem;margin-bottom:16px">🎉</div>
+    <h2 style="font-size:1.5rem;margin-bottom:8px">素材生成完成</h2>
+    <p style="color:var(--muted)" id="finalSummary"></p>
+    <div class="mt" style="display:flex;gap:12px;justify-content:center;margin-top:24px">
+      <button class="btn btn-primary" onclick="downloadProject()">打包下载 ZIP</button>
+      <button class="btn btn-secondary" onclick="location.reload()">开始新项目</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const API = window.location.origin;
+let projectId = null;
+let shots = [];
+let totalImages = 0;
+let doneImages = 0;
+
+function goStep(n) {
+  document.querySelectorAll('.step-item').forEach(function(el, i) {
+    el.classList.remove('active');
+    if (i < n - 1) el.classList.add('done'); else el.classList.remove('done');
+    if (i === n - 1) el.classList.add('active');
+  });
+  document.querySelectorAll('.panel').forEach(function(el, i) {
+    el.classList.toggle('visible', i === n - 1);
+  });
+  if (n === 4) {
+    document.getElementById('finalSummary').textContent =
+      '项目 ' + projectId + '：' + shots.length + ' 个镜头，' + totalImages + ' 张图片已处理';
+  }
+}
+
+function tagClass(type) {
+  var map = {'场景':'scene','人物':'person','数据':'data','文字':'text','隐喻':'metaphor','对比':'metaphor','书籍':'person'};
+  return 'tag tag-' + (map[type] || 'other');
+}
+
+function escapeText(str) {
+  var d = document.createElement('div');
+  d.textContent = str;
+  return d.textContent;
+}
+
+function buildShotRow(s) {
+  var tr = document.createElement('tr');
+
+  var td1 = document.createElement('td');
+  td1.textContent = String(s.shot_number).padStart(3, '0');
+  tr.appendChild(td1);
+
+  var td2 = document.createElement('td');
+  td2.style.whiteSpace = 'nowrap';
+  td2.textContent = s.time_range;
+  tr.appendChild(td2);
+
+  var td3 = document.createElement('td');
+  td3.textContent = s.script_text;
+  tr.appendChild(td3);
+
+  var td4 = document.createElement('td');
+  var span = document.createElement('span');
+  span.className = tagClass(s.asset_type);
+  span.textContent = s.asset_type;
+  td4.appendChild(span);
+  if (s.is_post_production) td4.appendChild(document.createTextNode(' 📋'));
+  tr.appendChild(td4);
+
+  var td5 = document.createElement('td');
+  td5.style.fontSize = '.8rem';
+  td5.style.color = 'var(--muted)';
+  td5.textContent = s.image_prompt;
+  tr.appendChild(td5);
+
+  var td6 = document.createElement('td');
+  td6.style.whiteSpace = 'nowrap';
+  td6.textContent = s.mood;
+  tr.appendChild(td6);
+
+  return tr;
+}
+
+function buildSummaryItems(shotsData) {
+  var box = document.getElementById('summaryBox');
+  box.textContent = '';
+  var postCount = shotsData.filter(function(s) { return s.is_post_production; }).length;
+  var types = {};
+  shotsData.forEach(function(s) { types[s.asset_type] = (types[s.asset_type] || 0) + 1; });
+
+  var items = [
+    { num: shotsData.length, lbl: '总镜头' },
+    { num: shotsData.length - postCount, lbl: '需生成图片' },
+    { num: postCount, lbl: '后期制作' },
+    { num: Object.keys(types).length, lbl: '素材类型' },
+  ];
+  items.forEach(function(item) {
+    var div = document.createElement('div');
+    div.className = 'summary-item';
+    var numEl = document.createElement('div');
+    numEl.className = 'num';
+    numEl.textContent = item.num;
+    var lblEl = document.createElement('div');
+    lblEl.className = 'lbl';
+    lblEl.textContent = item.lbl;
+    div.appendChild(numEl);
+    div.appendChild(lblEl);
+    box.appendChild(div);
+  });
+}
+
+function buildImageCard(s) {
+  var card = document.createElement('div');
+  card.className = 'img-card';
+  card.id = 'img-' + s.shot_number;
+
+  var placeholder = document.createElement('div');
+  placeholder.style.cssText = 'aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;background:#1a1a2e';
+
+  var info = document.createElement('div');
+  info.className = 'img-info';
+
+  var numSpan = document.createElement('span');
+  numSpan.className = 'shot-num';
+  numSpan.textContent = '#' + String(s.shot_number).padStart(3, '0');
+
+  if (s.is_post_production) {
+    placeholder.style.color = 'var(--muted)';
+    placeholder.style.fontSize = '.85rem';
+    placeholder.textContent = '📋 后期制作';
+    info.appendChild(numSpan);
+    info.appendChild(document.createTextNode(' ' + s.asset_type));
+  } else {
+    card.classList.add('pending');
+    var sp = document.createElement('span');
+    sp.className = 'spinner';
+    placeholder.appendChild(sp);
+    info.appendChild(numSpan);
+    info.appendChild(document.createTextNode(' 等待中...'));
+  }
+
+  card.appendChild(placeholder);
+  card.appendChild(info);
+  return card;
+}
+
+async function genStoryboard() {
+  var btn = document.getElementById('btnGenStoryboard');
+  var script = document.getElementById('scriptInput').value.trim();
+  if (!script) { alert('请输入逐字稿'); return; }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ 生成中...';
+
+  try {
+    var res = await fetch(API + '/api/storyboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        script_text: script,
+        style: document.getElementById('styleSelect').value,
+        duration: document.getElementById('durationSelect').value,
+      }),
+    });
+    if (!res.ok) {
+      var err = await res.text();
+      throw new Error(err);
+    }
+    var data = await res.json();
+    projectId = data.project_id;
+    shots = data.shots;
+
+    document.getElementById('projectIdDisplay').textContent = projectId;
+
+    // Warnings
+    var wb = document.getElementById('warningsBox');
+    wb.textContent = '';
+    if (data.warnings && data.warnings.length) {
+      var wDiv = document.createElement('div');
+      wDiv.className = 'warnings';
+      wDiv.textContent = data.warnings.map(function(w) { return '⚠️ ' + w; }).join('\n');
+      wb.appendChild(wDiv);
+    }
+
+    // Summary
+    buildSummaryItems(shots);
+
+    // Table
+    var tbody = document.getElementById('storyboardBody');
+    tbody.textContent = '';
+    shots.forEach(function(s) {
+      tbody.appendChild(buildShotRow(s));
+    });
+
+    goStep(2);
+  } catch (e) {
+    alert('生成失败：' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '生成分镜表';
+  }
+}
+
+async function genImages() {
+  goStep(3);
+  var style = document.getElementById('imgStyleSelect').value;
+  var concurrency = parseInt(document.getElementById('concurrencyInput').value) || 3;
+
+  totalImages = shots.filter(function(s) { return !s.is_post_production; }).length;
+  doneImages = 0;
+
+  var grid = document.getElementById('imgGrid');
+  grid.textContent = '';
+  shots.forEach(function(s) {
+    grid.appendChild(buildImageCard(s));
+  });
+
+  updateProgress();
+
+  try {
+    var res = await fetch(API + '/api/images/' + projectId, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ style: style, concurrency: concurrency, aspect_ratio: '16:9' }),
+    });
+
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
+
+    while (true) {
+      var chunk = await reader.read();
+      if (chunk.done) break;
+      buffer += decoder.decode(chunk.value, { stream: true });
+
+      var lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (!line.startsWith('data: ')) continue;
+        var jsonStr = line.slice(6).trim();
+        if (!jsonStr) continue;
+        try {
+          var evt = JSON.parse(jsonStr);
+          if (evt.done) continue;
+          handleImageResult(evt);
+        } catch (ignored) {}
+      }
+    }
+  } catch (e) {
+    document.getElementById('progressText').textContent = '出错了：' + e.message;
+  }
+
+  document.getElementById('imgDoneActions').style.display = 'flex';
+}
+
+function handleImageResult(r) {
+  var card = document.getElementById('img-' + r.shot_number);
+  if (!card) return;
+
+  card.classList.remove('pending');
+  card.textContent = '';
+
+  if (r.status === 'success') {
+    doneImages++;
+    var img = document.createElement('img');
+    img.alt = '镜头 ' + r.shot_number;
+    img.src = API + '/data/projects/' + projectId + '/' + r.file_path;
+    card.appendChild(img);
+
+    var info = document.createElement('div');
+    info.className = 'img-info';
+    var numSpan = document.createElement('span');
+    numSpan.className = 'shot-num';
+    numSpan.textContent = '#' + String(r.shot_number).padStart(3, '0');
+    info.appendChild(numSpan);
+    info.appendChild(document.createTextNode(' 完成'));
+    card.appendChild(info);
+  } else if (r.status === 'failed') {
+    doneImages++;
+    card.classList.add('failed');
+    var errDiv = document.createElement('div');
+    errDiv.style.cssText = 'aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;background:#1a0000;color:#ff6b6b;font-size:.85rem;padding:8px;text-align:center';
+    errDiv.textContent = r.error || '生成失败';
+    card.appendChild(errDiv);
+
+    var info2 = document.createElement('div');
+    info2.className = 'img-info';
+    var numSpan2 = document.createElement('span');
+    numSpan2.className = 'shot-num';
+    numSpan2.textContent = '#' + String(r.shot_number).padStart(3, '0');
+    info2.appendChild(numSpan2);
+    info2.appendChild(document.createTextNode(' 失败'));
+    card.appendChild(info2);
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  var pct = totalImages > 0 ? Math.round(doneImages / totalImages * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = doneImages + ' / ' + totalImages + ' 张图片已完成（' + pct + '%）';
+}
+
+function downloadProject() {
+  if (projectId) {
+    window.open(API + '/api/download/' + projectId, '_blank');
+  }
+}
+</script>
+
+</body>
+</html>

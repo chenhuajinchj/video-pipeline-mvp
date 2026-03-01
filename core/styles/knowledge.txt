@@ -1,1 +1,10 @@
-Style: Warm and inviting. Golden hour lighting with soft amber tones. Academic and intellectual atmosphere. Clean backgrounds with subtle texture. Book-like quality with thoughtful composition. Gentle depth of field. Conveys clarity, wisdom, and contemplation.
+STYLE REQUIREMENTS (MUST follow for every image):
+- Medium: Clean digital illustration, NOT photorealistic, NOT 3D render
+- Color palette: Warm amber and soft cream tones with muted blue-gray accents. Every image uses this exact palette.
+- Lighting: Soft golden-hour warmth, diffused and gentle. No harsh shadows, no neon, no dramatic contrast.
+- Texture: Subtle paper-like grain, like a premium magazine editorial illustration
+- Composition: Clean and minimal, generous negative space, single clear focal point
+- Human figures: Semi-realistic illustration style (NOT anime, NOT photorealistic), consistent proportions
+- Backgrounds: Simple, slightly blurred or abstract, never competing with the subject
+- Mood: Thoughtful, intellectual, warm. Like a high-end TED talk visual.
+- NEVER include: neon lights, sci-fi elements, holographic effects, glowing particles, dark cyberpunk aesthetics, 3D renders, photorealistic faces, text or letters in the image

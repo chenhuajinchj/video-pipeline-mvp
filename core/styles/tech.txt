@@ -1,1 +1,10 @@
-Style: Futuristic and sleek. Cool blue and teal color palette with subtle neon accents. Clean minimalist environments with technology elements. Soft glowing ambient lighting. Digital/holographic overlays. Modern glass and metal surfaces. High-tech atmosphere with a sense of innovation and progress.
+STYLE REQUIREMENTS (MUST follow for every image):
+- Medium: Modern flat illustration with subtle depth, NOT photorealistic, NOT 3D render
+- Color palette: Cool blue (#3B82F6) and slate gray (#64748B) with white accents. Every image uses this exact palette.
+- Lighting: Clean and even, soft directional light from upper-left. No harsh shadows.
+- Texture: Smooth and polished, minimal grain, like a premium tech brand visual
+- Composition: Geometric and structured, grid-aligned elements, generous whitespace
+- Human figures: Stylized minimal illustration (like Notion or Linear app style), consistent proportions
+- Backgrounds: Abstract geometric shapes or clean gradients, never photographic
+- Mood: Professional, innovative, trustworthy. Like Apple keynote visuals.
+- NEVER include: neon cyberpunk aesthetics, holographic effects, glowing particles, cluttered compositions, photorealistic faces, text or letters in the image

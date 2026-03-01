@@ -34,34 +34,60 @@ ${script_content}
 ## 字段说明
 
 ### asset_type（素材类型）
-- `场景` — 实际场景画面（办公室、街道、自然等）
-- `人物` — 提到的人物形象
+- `场景` — 实际场景画面（办公室、街道、咖啡店、自然等），这是最常用的类型
+- `人物` — 提到的人物形象（注意：同一人物在不同镜头中必须保持一致的外貌描述）
 - `书籍` — 提到的书籍/论文
 - `数据` — 数据图表、统计数字的动态呈现（标记 is_post_production: true）
 - `文字` — 关键概念/金句的文字排版（标记 is_post_production: true）
-- `隐喻` — 视觉比喻/象征画面
-- `对比` — 前后对比、A vs B
+- `隐喻` — 视觉比喻/象征画面（**整片不超过 3 个**，仅用于核心论点）
+- `对比` — 前后对比、A vs B（标记 is_post_production: true）
 - `分屏` — 多画面同时展示（标记 is_post_production: true）
+
+### 素材类型分配原则
+- `场景` 和 `人物` 应占总镜头的 60% 以上，它们是观众最容易理解和共情的画面
+- `隐喻` 整片严格不超过 3 个，滥用隐喻会让画面抽象难懂且风格跳跃
+- `文字` 和 `数据` 是后期制作类型，不需要 AI 生成图片
+- 避免连续 2 个以上相同的 asset_type
 
 ### image_prompt 规则
 - 必须用英文
 - 描述具体、可视化的画面，适合 AI 图片生成
-- 包含画面构图、光线、色调、氛围等信息
-- 人物照片：描述人物特征和场景（如 "a professor in his 40s giving a lecture in a modern university hall"）
-- 书籍：描述封面设计风格（如 "a hardcover book with minimalist blue cover, title 'Deep Work'"）
-- 场景：描述具体环境细节（如 "a cluttered desk with multiple screens showing notifications, warm office lighting"）
-- 隐喻/对比：描述象征性画面（如 "a shattered hourglass with sand particles floating in zero gravity, dark background"）
-- 15-50 个英文单词
+- **风格一致性是最重要的原则**：所有 image_prompt 必须遵循同一视觉语言
+- 每个 prompt 必须包含以下元素：
+  1. 主体描述（WHO/WHAT）：具体的人物或物体
+  2. 环境描述（WHERE）：具体场所或背景
+  3. 光线色调（LIGHTING）：与整片一致的光线风格
+  4. 构图方式（COMPOSITION）：如 close-up, wide shot, over-the-shoulder
+- **禁止的描述**：
+  - 不要写 "holographic"、"neon glow"、"cybernetic"、"futuristic UI" 等科幻元素（除非视频主题就是科幻）
+  - 不要写 "glowing"、"laser"、"digital particles" 等过于特效化的描述
+  - 不要写动态描述如 "appearing"、"transforming"、"flying"（AI 生成的是静态图片）
+- **推荐的描述风格**：
+  - 场景：描述真实可信的环境（"a modern co-working space with natural light"）
+  - 人物：描述具体外貌和神态（"a man in his late 20s, wearing a gray hoodie, looking at his laptop with a frustrated expression"）
+  - 隐喻：用静态的象征画面（"a beautifully crafted key lying on a table with no matching lock"）
+- 长度：20-40 个英文单词，简洁精确
+
+### 人物一致性规则
+- 同一人物在所有镜头中必须有完全一致的外貌描述
+- 第一次出现时建立外貌基准（年龄、性别、发型、服装），后续镜头引用相同描述
+- 叙述者/旁白视角不需要人物镜头，用场景替代
 
 ### is_post_production 规则
-- `数据`、`文字`、`分屏` 类型必须标记为 true
+- `数据`、`文字`、`对比`、`分屏` 类型必须标记为 true
 - 其他类型标记为 false
 
 ### 镜头时长规则
-- 标准节奏：3-5 秒/镜头
-- 快节奏段落（开头钩子、数据冲击）：2-3 秒
-- 慢节奏段落（故事展开、情感共鸣、结尾）：5-8 秒
+- 标准节奏：4-6 秒/镜头
+- 快节奏段落（开头钩子、数据冲击）：3-4 秒
+- 慢节奏段落（故事展开、情感共鸣、结尾）：6-8 秒
 - 单镜头不超过 10 秒
+
+### 镜头合并规则
+- 同一段落中描述同一事物的连续短句，应合并为一个镜头
+- 例如："它能自主规划、使用工具、完成复杂任务。" 应该是一个镜头而非三个
+- 排比句/列举句合并为一个镜头，用最能代表整体含义的画面
+- 目标：每 100 字逐字稿对应 2-4 个镜头（不是每句话一个镜头）
 
 ### 节奏规则
 - 开头 30 秒：快节奏，密集切换
@@ -70,10 +96,17 @@ ${script_content}
 - 结尾：先慢后收束
 - 避免连续 3 个以上同类型素材
 
+### 镜头总数控制
+- 1000 字逐字稿：20-25 个镜头
+- 500 字逐字稿：10-15 个镜头
+- 2000 字逐字稿：35-45 个镜头
+- 如果超出范围，优先合并相邻的短镜头
+
 ## 重要
 
 - 只输出 JSON 数组，不要其他文字
-- 确保每句逐字稿都有对应镜头
+- 确保逐字稿的每一部分都有对应镜头覆盖
 - 镜头编号从 1 开始连续递增
 - 所有提到的人名、书名、数据都必须有对应镜头
 - 总镜头时长之和应接近目标总时长
+- **风格统一比画面丰富更重要**：宁可所有画面风格统一但略显单调，也不要画面丰富但风格跳跃

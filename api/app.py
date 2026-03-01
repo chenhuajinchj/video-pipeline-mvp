@@ -25,6 +25,11 @@ app.include_router(storyboard.router, prefix="/api", tags=["分镜"])
 app.include_router(images.router, prefix="/api", tags=["图片"])
 app.include_router(projects.router, prefix="/api", tags=["项目"])
 
+# 挂载项目数据（图片预览）
+DATA_DIR = Path(__file__).parent.parent / "data" / "projects"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/data/projects", StaticFiles(directory=str(DATA_DIR)), name="data")
+
 # 挂载静态文件（放在最后，作为 fallback）
 SITE_DIR = Path(__file__).parent.parent / "site"
 if SITE_DIR.exists():

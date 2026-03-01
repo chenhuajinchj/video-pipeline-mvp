@@ -10,7 +10,7 @@ import httpx
 from .models import Shot, StoryboardRequest, StoryboardResult
 
 PROMPT_TEMPLATE_PATH = Path(__file__).parent / "prompts" / "storyboard_prompt.txt"
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-3-flash-preview"
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 
 

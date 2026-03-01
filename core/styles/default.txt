@@ -1,1 +1,10 @@
-Style: Photorealistic, cinematic quality. Natural lighting with soft shadows. Professional color grading. Clean composition with clear focal point. Modern and polished aesthetic.
+STYLE REQUIREMENTS (MUST follow for every image):
+- Medium: Clean digital illustration with cinematic composition
+- Color palette: Neutral tones with one accent color. Consistent across all images.
+- Lighting: Natural and soft, golden-hour quality. No harsh or dramatic lighting.
+- Texture: Subtle and refined, slight grain for warmth
+- Composition: Clear focal point, balanced layout, moderate negative space
+- Human figures: Semi-realistic illustration style, consistent proportions across all images
+- Backgrounds: Simple and uncluttered, complementing the subject
+- Mood: Professional and approachable
+- NEVER include: neon lights, sci-fi elements, holographic effects, glowing particles, photorealistic faces, text or letters in the image

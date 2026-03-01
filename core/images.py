@@ -10,7 +10,7 @@ import httpx
 
 from .models import ImageResult, Shot
 
-GEMINI_IMAGE_MODEL = "gemini-2.0-flash-exp-image-generation"
+GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image-preview"
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 STYLES_DIR = Path(__file__).parent / "styles"
 
@@ -36,7 +36,15 @@ async def _generate_single_image(
     filename = f"{str(shot.shot_number).zfill(3)}.png"
     output_path = output_dir / filename
 
-    full_prompt = f"{style_prefix}\n\n{shot.image_prompt}\n\nAspect ratio: {aspect_ratio}. High quality, detailed."
+    full_prompt = (
+        f"{style_prefix}\n\n"
+        f"Subject: {shot.image_prompt}\n\n"
+        f"Aspect ratio: {aspect_ratio}.\n"
+        f"IMPORTANT: Follow the STYLE REQUIREMENTS above exactly. "
+        f"Do NOT add text, letters, or words into the image. "
+        f"Do NOT use photorealistic style. "
+        f"Keep the illustration style consistent with the style requirements."
+    )
 
     url = GEMINI_API_URL.format(model=GEMINI_IMAGE_MODEL) + f"?key={api_key}"
     payload = {

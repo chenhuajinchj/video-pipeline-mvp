@@ -1,0 +1,68 @@
+{
+  "name": "video-pipeline",
+  "description": "AI video production pipeline: generate storyboards from scripts and batch-produce illustration images using Gemini AI. Manages full project lifecycle from script input to downloadable image assets.",
+  "version": "0.1.0",
+  "repository": "https://github.com/chenhuajinchj/video-pipeline-mvp",
+  "license": "MIT",
+  "runtime": "python",
+  "command": "python -m mcp_server.server",
+  "environment": {
+    "GEMINI_API_KEY": {
+      "description": "Google Gemini API key with image generation access",
+      "required": true
+    }
+  },
+  "tools": [
+    {
+      "name": "create_storyboard",
+      "description": "Generate a structured storyboard from script text. Analyzes the script and decomposes it into shot-by-shot breakdown with visual descriptions, timing, and mood annotations.",
+      "parameters": {
+        "script_text": "Full script/narration text (required)",
+        "style": "Video style hint (optional, default: AI科技/知识分享)",
+        "duration": "Target video duration (optional, default: 6-10分钟)"
+      }
+    },
+    {
+      "name": "list_projects",
+      "description": "List all video projects with their status and metadata."
+    },
+    {
+      "name": "get_project",
+      "description": "Get full project details including storyboard shots and generated image file list.",
+      "parameters": {
+        "project_id": "Project identifier (required)"
+      }
+    },
+    {
+      "name": "edit_storyboard",
+      "description": "Replace a project's storyboard with updated shots. Use after reviewing and modifying the auto-generated storyboard.",
+      "parameters": {
+        "project_id": "Project identifier (required)",
+        "shots": "Array of shot objects with shot_number, time_range, script_text, asset_type, image_prompt, mood, is_post_production (required)"
+      }
+    },
+    {
+      "name": "generate_images",
+      "description": "Batch generate illustration images for all shots in a project's storyboard. Skips post-production shots automatically.",
+      "parameters": {
+        "project_id": "Project identifier (required)",
+        "style": "Style preset: default, tech, knowledge (optional)",
+        "concurrency": "Parallel generation limit 1-10 (optional, default: 3)"
+      }
+    },
+    {
+      "name": "get_image_status",
+      "description": "Check how many images have been generated vs total shots requiring images.",
+      "parameters": {
+        "project_id": "Project identifier (required)"
+      }
+    },
+    {
+      "name": "download_project",
+      "description": "Get project file listing with paths and download URL for retrieving all project assets.",
+      "parameters": {
+        "project_id": "Project identifier (required)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+# Video Pipeline MVP
+
+> AI-powered video production pipeline. Input a script (逐字稿),
+> automatically generate storyboard shots with Gemini Flash, then
+> batch-generate consistent illustration images with Gemini Image API.
+> Dual interface: REST API + MCP Server.
+
+## Core Capabilities
+
+- Storyboard generation: Parse script text into structured shot-by-shot storyboard using Gemini Flash
+- Batch image generation: Generate consistent illustration images per shot using Gemini Image API, with concurrency control and style presets
+- Project management: Full CRUD lifecycle — create, list, view, edit storyboard, delete, and zip-download projects
+- MCP Server: stdio-based Model Context Protocol server for Claude Desktop / AI agent integration
+- REST API: FastAPI with auto-generated OpenAPI docs, SSE streaming for image generation progress
+
+## Tech Stack
+
+- Python 3.11+, FastAPI, Pydantic v2, httpx
+- Gemini Flash (storyboard) + Gemini Image API (illustrations)
+- MCP SDK for AI tool integration
+- Docker Compose for deployment
+
+## API Endpoints
+
+| Method | Path | Description | Input | Output |
+|--------|------|-------------|-------|--------|
+| POST | /api/storyboard | Generate storyboard from script | `{script_text, style?, duration?}` | `{project_id, shots[], warnings[]}` |
+| POST | /api/images/{id} | Batch generate images (SSE stream) | `{style?, concurrency?, aspect_ratio?}` | SSE events with per-shot results |
+| GET | /api/images/{id} | Query image generation status | — | `{completed, total, files[]}` |
+| GET | /api/projects | List all projects | — | `[{id, name, status, shot_count, created_at}]` |
+| GET | /api/projects/{id} | Get project details + storyboard | — | Full project with shots and image list |
+| PUT | /api/projects/{id}/storyboard | Edit storyboard shots | `{shots[]}` | Updated storyboard |
+| DELETE | /api/projects/{id} | Delete project | — | Success message |
+| GET | /api/download/{id} | Download project as zip | — | Zip file stream |
+
+## MCP Tools
+
+| Tool | Description | Required Params |
+|------|-------------|-----------------|
+| create_storyboard | Generate storyboard from script text | script_text |
+| list_projects | List all video projects | — |
+| get_project | Get project details with storyboard and image status | project_id |
+| edit_storyboard | Update project storyboard shots | project_id, shots |
+| generate_images | Batch generate images for a project | project_id |
+| get_image_status | Check image generation progress | project_id |
+| download_project | Get project file listing and download URL | project_id |
+
+## Quick Start
+
+```bash
+pip install -r requirements.txt
+export GEMINI_API_KEY=your-key
+uvicorn api.app:app --host 0.0.0.0 --port 8600
+```
+
+## Data Model
+
+- **Shot**: shot_number, time_range, script_text, asset_type, image_prompt, mood, is_post_production
+- **Project**: id, name, created_at, status (created → storyboard_done → images_in_progress → images_done), shot_count, style
+- **Styles**: default, tech, knowledge (loaded from core/styles/*.txt)
+
+## File Structure
+
+```
+api/           — FastAPI app, routes (storyboard, images, projects)
+core/          — Business logic (storyboard.py, images.py, models.py, prompts/, styles/)
+mcp_server/    — MCP stdio server (server.py)
+data/projects/ — Project storage (storyboard.json, visuals/*.png, meta.json)
+site/          — Static frontend
+```

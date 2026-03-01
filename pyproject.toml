@@ -1,8 +1,29 @@
 [project]
 name = "video-pipeline-mvp"
 version = "0.1.0"
-description = "小陈的视频流水线 — AI 视频生产流水线"
+description = "AI-powered video production pipeline: script → storyboard → images. REST API + MCP Server."
 requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "chenhuajin"}]
+readme = "README.md"
+keywords = [
+    "video",
+    "ai",
+    "storyboard",
+    "image-generation",
+    "gemini",
+    "mcp",
+    "content-creation",
+    "video-production",
+    "mcp-server",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Multimedia :: Video",
+]
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn>=0.34.0",
@@ -10,6 +31,12 @@ dependencies = [
     "pydantic>=2.10.0",
     "mcp>=1.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/chenhuajinchj/video-pipeline-mvp"
+Repository = "https://github.com/chenhuajinchj/video-pipeline-mvp"
+Documentation = "https://github.com/chenhuajinchj/video-pipeline-mvp#readme"
+Issues = "https://github.com/chenhuajinchj/video-pipeline-mvp/issues"
 
 [project.scripts]
 video-pipeline-api = "api.app:main"

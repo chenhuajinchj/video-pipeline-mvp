@@ -1,0 +1,16 @@
+[project]
+name = "video-pipeline-mvp"
+version = "0.1.0"
+description = "小陈的视频流水线 — AI 视频生产流水线"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.34.0",
+    "httpx>=0.28.0",
+    "pydantic>=2.10.0",
+    "mcp>=1.0.0",
+]
+
+[project.scripts]
+video-pipeline-api = "api.app:main"
+video-pipeline-mcp = "mcp_server.server:main"

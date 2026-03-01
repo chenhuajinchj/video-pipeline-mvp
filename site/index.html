@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小陈的视频流水线</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--card:#12121a;--border:#1e1e2e;--text:#e0e0e0;--muted:#888;--accent:#6c5ce7;--accent2:#a29bfe}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+a{color:var(--accent2);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.container{max-width:900px;margin:0 auto;padding:0 24px}
+
+header{text-align:center;padding:80px 0 40px}
+header h1{font-size:2.4rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{font-size:1.15rem;color:var(--muted);margin-top:12px;max-width:520px;margin-left:auto;margin-right:auto}
+
+.flow{display:flex;align-items:center;justify-content:center;gap:8px;margin:48px 0;flex-wrap:wrap}
+.flow-step{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 24px;text-align:center;min-width:120px}
+.flow-step .icon{font-size:1.6rem;margin-bottom:6px}
+.flow-step .label{font-size:.9rem;color:var(--muted)}
+.flow-arrow{color:var(--accent);font-size:1.4rem}
+
+section{margin:48px 0}
+section h2{font-size:1.5rem;margin-bottom:20px;color:var(--accent2)}
+
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:600px){.cards{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px}
+.card h3{font-size:1.1rem;margin-bottom:8px}
+.card p{color:var(--muted);font-size:.9rem}
+
+pre{background:#1a1a2e;border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;font-size:.85rem;line-height:1.6}
+code{font-family:"SF Mono",Menlo,Monaco,monospace}
+
+.endpoint{margin-bottom:16px}
+.method{display:inline-block;font-weight:700;font-size:.75rem;padding:2px 8px;border-radius:4px;margin-right:8px}
+.method.post{background:#2d6a4f;color:#b7e4c7}
+.method.get{background:#1d3557;color:#a8dadc}
+.method.put{background:#e76f51;color:#fff}
+.method.delete{background:#9b2226;color:#fff}
+.path{font-family:monospace;color:var(--accent2)}
+
+footer{text-align:center;padding:48px 0;color:var(--muted);font-size:.85rem;border-top:1px solid var(--border);margin-top:64px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>小陈的视频流水线</h1>
+  <p>AI 驱动的视频生产流水线 — 从逐字稿到视频素材，API 优先，AI-to-AI 原生交互</p>
+</header>
+
+<div class="flow">
+  <div class="flow-step"><div class="icon">📝</div><div class="label">逐字稿</div></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step"><div class="icon">🎬</div><div class="label">分镜表</div></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step"><div class="icon">🖼️</div><div class="label">图片素材</div></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step"><div class="icon">📦</div><div class="label">打包下载</div></div>
+</div>
+
+<section>
+  <h2>两种接入方式</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>REST API</h3>
+      <p>标准 HTTP 接口，支持 curl、Python、任何 HTTP 客户端调用。实时 SSE 进度推送。</p>
+      <p style="margin-top:12px"><a href="/docs">查看 API 文档 →</a></p>
+    </div>
+    <div class="card">
+      <h3>MCP Server</h3>
+      <p>Model Context Protocol 原生支持，Claude Desktop / Claude Code 直接调用，AI-to-AI 无缝协作。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>API 速览</h2>
+  <div class="endpoint"><span class="method post">POST</span><span class="path">/api/storyboard</span> — 输入逐字稿，生成分镜表</div>
+  <div class="endpoint"><span class="method post">POST</span><span class="path">/api/images/{id}</span> — 批量生成图片（SSE 流）</div>
+  <div class="endpoint"><span class="method get">GET</span><span class="path">/api/projects</span> — 列出所有项目</div>
+  <div class="endpoint"><span class="method get">GET</span><span class="path">/api/projects/{id}</span> — 项目详情</div>
+  <div class="endpoint"><span class="method put">PUT</span><span class="path">/api/projects/{id}/storyboard</span> — 编辑分镜</div>
+  <div class="endpoint"><span class="method get">GET</span><span class="path">/api/download/{id}</span> — 打包下载</div>
+</section>
+
+<section>
+  <h2>快速开始</h2>
+  <pre><code># 1. 生成分镜
+curl -X POST http://localhost:8600/api/storyboard \
+  -H "Content-Type: application/json" \
+  -d '{"script_text": "你的逐字稿内容...", "style": "AI科技"}'
+
+# 2. 生成图片（返回 SSE 流）
+curl http://localhost:8600/api/images/{project_id} \
+  -X POST -H "Content-Type: application/json" \
+  -d '{"style": "tech", "concurrency": 3}'
+
+# 3. 下载项目
+curl -O http://localhost:8600/api/download/{project_id}</code></pre>
+</section>
+
+<section>
+  <h2>MCP 配置</h2>
+  <p style="color:var(--muted);margin-bottom:16px">在 Claude Desktop 的 <code>claude_desktop_config.json</code> 中添加：</p>
+  <pre><code>{
+  "mcpServers": {
+    "video-pipeline": {
+      "command": "python",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "/path/to/video-pipeline-mvp",
+      "env": {
+        "GEMINI_API_KEY": "your-api-key"
+      }
+    }
+  }
+}</code></pre>
+</section>
+
+<footer>
+  <p>小陈的视频流水线 · API 优先 · AI-to-AI 原生</p>
+</footer>
+
+</div>
+</body>
+</html>

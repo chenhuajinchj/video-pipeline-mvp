@@ -34,7 +34,7 @@
 
 ```bash
 # 1. 克隆并安装依赖
-git clone https://github.com/chenhuajinchj/video-pipeline-mvp.git
+git clone https://github.com/chenyuxiaojin/video-pipeline-mvp.git
 cd video-pipeline-mvp
 pip install -r requirements.txt
 

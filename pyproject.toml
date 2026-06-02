@@ -33,10 +33,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/chenhuajinchj/video-pipeline-mvp"
-Repository = "https://github.com/chenhuajinchj/video-pipeline-mvp"
-Documentation = "https://github.com/chenhuajinchj/video-pipeline-mvp#readme"
-Issues = "https://github.com/chenhuajinchj/video-pipeline-mvp/issues"
+Homepage = "https://github.com/chenyuxiaojin/video-pipeline-mvp"
+Repository = "https://github.com/chenyuxiaojin/video-pipeline-mvp"
+Documentation = "https://github.com/chenyuxiaojin/video-pipeline-mvp#readme"
+Issues = "https://github.com/chenyuxiaojin/video-pipeline-mvp/issues"
 
 [project.scripts]
 video-pipeline-api = "api.app:main"

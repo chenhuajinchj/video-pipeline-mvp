@@ -2,7 +2,7 @@
   "name": "video-pipeline",
   "description": "AI video production pipeline: generate storyboards from scripts and batch-produce illustration images using Gemini AI. Manages full project lifecycle from script input to downloadable image assets.",
   "version": "0.1.0",
-  "repository": "https://github.com/chenhuajinchj/video-pipeline-mvp",
+  "repository": "https://github.com/chenyuxiaojin/video-pipeline-mvp",
   "license": "MIT",
   "runtime": "python",
   "command": "python -m mcp_server.server",

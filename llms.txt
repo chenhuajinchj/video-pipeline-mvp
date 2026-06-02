@@ -68,3 +68,7 @@ mcp_server/    — MCP stdio server (server.py)
 data/projects/ — Project storage (storyboard.json, visuals/*.png, meta.json)
 site/          — Static frontend
 ```
+
+## Documentation
+
+- [中文文档 (README.zh-CN.md)](README.zh-CN.md)

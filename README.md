@@ -1,3 +1,5 @@
+**English** | [中文文档](README.zh-CN.md)
+
 # Video Pipeline MVP — AI Video Production Pipeline
 
 > Transform a script into storyboard shots and illustration images, fully automated with Gemini AI. Dual interface: REST API + MCP Server for Claude Desktop.
